@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe Ultimate</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            --text-color: #ffffff;
+            --x-color: #ff6b6b;
+            --o-color: #4ecdc4;
+            --highlight: rgba(255, 255, 255, 0.2);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-gradient);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            color: var(--text-color);
+            overflow: hidden;
+        }
+
+        /* Main Glass Container */
+        .container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            max-width: 420px;
+            width: 90%;
+            transition: all 0.3s ease;
+        }
+
+        h1 {
+            margin: 0 0 15px 0;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        /* Settings Area */
+        .settings {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 15px;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            opacity: 0.9;
+        }
+
+        select {
+            font-family: 'Poppins', sans-serif;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            outline: none;
+            width: 140px;
+        }
+        
+        select option {
+            background: #333;
+            color: white;
+        }
+
+        /* Game Grid */
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .cell {
+            background: rgba(255, 255, 255, 0.1);
+            height: 90px;
+            width: 90px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.05);
+        }
+
+        .cell:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Player Colors & Animations */
+        .cell[data-player="X"] { color: var(--x-color); text-shadow: 0 0 15px rgba(255, 107, 107, 0.6); }
+        .cell[data-player="O"] { color: var(--o-color); text-shadow: 0 0 15px rgba(78, 205, 196, 0.6); }
+
+        .cell.pop { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Status & Buttons */
+        .status {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            min-height: 1.5rem;
+            color: #efefef;
+        }
+
+        .restart-btn {
+            padding: 12px 30px;
+            border-radius: 50px;
+            border: none;
+            background: white;
+            color: #764ba2;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+        }
+
+        .restart-btn:hover { transform: scale(1.05); }
+
+        .disabled { pointer-events: none; opacity: 0.7; }
+        .hidden { display: none; }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>TIC TAC TOE</h1>
+        
+        <div class="settings">
+            <div class="row">
+                <label>Mode:</label>
+                <select id="gameMode">
+                    <option value="pvc">vs AI</option>
+                    <option value="pvp">1 vs 1</option>
+                </select>
+            </div>
+            <div class="row" id="difficultyRow">
+                <label>Difficulty:</label>
+                <select id="difficulty">
+                    <option value="easy">Easy</option>
+                    <option value="impossible" selected>Impossible</option>
+                </select>
+            </div>
+            <div class="row">
+                <label>Start as:</label>
+                <select id="startPlayer">
+                    <option value="X">Player X (First)</option>
+                    <option value="O">Player O (Second)</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="status" id="status">Player X's Turn</div>
+
+        <div class="game-grid" id="grid">
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+            <div class="cell" data-index="5"></div>
+            <div class="cell" data-index="6"></div>
+            <div class="cell" data-index="7"></div>
+            <div class="cell" data-index="8"></div>
+        </div>
+
+        <button class="restart-btn" id="restartBtn">Restart Game</button>
+    </div>
+
+    <script>
+        const statusDisplay = document.getElementById('status');
+        const cells = document.querySelectorAll('.cell');
+        const restartBtn = document.getElementById('restartBtn');
+        const gridElement = document.getElementById('grid');
+        
+        // Settings Elements
+        const gameModeSelect = document.getElementById('gameMode');
+        const difficultySelect = document.getElementById('difficulty');
+        const difficultyRow = document.getElementById('difficultyRow');
+        const startPlayerSelect = document.getElementById('startPlayer');
+
+        // Game State
+        let gameActive = true;
+        let currentPlayer = "X";
+        let gameState = ["", "", "", "", "", "", "", "", ""];
+        let humanSide = "X"; // Which side is the human playing? (Only relevant for AI mode)
+
+        const winningConditions = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],
+            [0, 4, 8], [2, 4, 6]
+        ];
+
+        // --- Event Listeners for Settings ---
+        gameModeSelect.addEventListener('change', () => {
+            if (gameModeSelect.value === 'pvp') {
+                difficultyRow.classList.add('hidden');
+            } else {
+                difficultyRow.classList.remove('hidden');
+            }
+            restartGame();
+        });
+
+        difficultySelect.addEventListener('change', restartGame);
+        startPlayerSelect.addEventListener('change', restartGame);
+
+        // --- Core Game Logic ---
+
+        function handleCellClick(e) {
+            const clickedCell = e.target;
+            const clickedCellIndex = parseInt(clickedCell.getAttribute('data-index'));
+
+            // Check if cell is taken or game over
+            if (gameState[clickedCellIndex] !== "" || !gameActive) return;
+
+            // In AI mode, if it's AI's turn, ignore clicks (safety check)
+            if (gameModeSelect.value === 'pvc' && currentPlayer !== humanSide) return;
+
+            // Execute Move
+            handleCellPlayed(clickedCell, clickedCellIndex);
+            
+            // Validate Result
+            if (validateResult()) return;
+
+            // Switch Turn
+            switchPlayer();
+        }
+
+        function handleCellPlayed(cell, index) {
+            gameState[index] = currentPlayer;
+            cell.innerText = currentPlayer;
+            cell.setAttribute('data-player', currentPlayer);
+            cell.classList.add('pop');
+        }
+
+        function switchPlayer() {
+            currentPlayer = currentPlayer === "X" ? "O" : "X";
+            statusDisplay.innerText = `Player ${currentPlayer}'s Turn`;
+
+            // If AI Mode and it's AI's turn
+            if (gameModeSelect.value === 'pvc' && currentPlayer !== humanSide && gameActive) {
+                gridElement.classList.add('disabled');
+                statusDisplay.innerText = "AI is thinking...";
+                setTimeout(makeComputerMove, 600);
+            } else {
+                gridElement.classList.remove('disabled');
+            }
+        }
+
+        function validateResult() {
+            let roundWon = false;
+            for (let i = 0; i <= 7; i++) {
+                const winCondition = winningConditions[i];
+                let a = gameState[winCondition[0]];
+                let b = gameState[winCondition[1]];
+                let c = gameState[winCondition[2]];
+                if (a === '' || b === '' || c === '') continue;
+                if (a === b && b === c) {
+                    roundWon = true;
+                    break;
+                }
+            }
+
+            if (roundWon) {
+                statusDisplay.innerText = `Player ${currentPlayer} Wins!`;
+                gameActive = false;
+                gridElement.classList.remove('disabled'); // Ensure clickable for restart
+                return true;
+            }
+
+            if (!gameState.includes("")) {
+                statusDisplay.innerText = "It's a Draw!";
+                gameActive = false;
+                gridElement.classList.remove('disabled');
+                return true;
+            }
+
+            return false;
+        }
+
+        // --- AI Logic ---
+
+        function makeComputerMove() {
+            if (!gameActive) return;
+
+            let moveIndex;
+            const difficulty = difficultySelect.value;
+            const aiSymbol = currentPlayer; // The AI is whoever is currently playing
+
+            if (difficulty === "easy") {
+                moveIndex = getRandomMove();
+            } else {
+                moveIndex = getBestMove(aiSymbol);
+            }
+
+            const cell = document.querySelector(`.cell[data-index='${moveIndex}']`);
+            handleCellPlayed(cell, moveIndex);
+            
+            if (!validateResult()) {
+                switchPlayer();
+            }
+        }
+
+        function getRandomMove() {
+            const emptyIndices = gameState.map((val, idx) => val === "" ? idx : null).filter(val => val !== null);
+            return emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+        }
+
+        // Minimax Algorithm
+        function getBestMove(aiPlayer) {
+            let bestScore = -Infinity;
+            let move;
+            let humanPlayer = aiPlayer === "X" ? "O" : "X";
+
+            for (let i = 0; i < 9; i++) {
+                if (gameState[i] === "") {
+                    gameState[i] = aiPlayer;
+                    let score = minimax(gameState, 0, false, aiPlayer, humanPlayer);
+                    gameState[i] = "";
+                    if (score > bestScore) {
+                        bestScore = score;
+                        move = i;
+                    }
+                }
+            }
+            return move;
+        }
+
+        function minimax(board, depth, isMaximizing, aiPlayer, humanPlayer) {
+            if (checkWin(board, aiPlayer)) return 10 - depth;
+            if (checkWin(board, humanPlayer)) return depth - 10;
+            if (!board.includes("")) return 0;
+
+            if (isMaximizing) {
+                let bestScore = -Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (board[i] === "") {
+                        board[i] = aiPlayer;
+                        let score = minimax(board, depth + 1, false, aiPlayer, humanPlayer);
+                        board[i] = "";
+                        bestScore = Math.max(score, bestScore);
+                    }
+                }
+                return bestScore;
+            } else {
+                let bestScore = Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (board[i] === "") {
+                        board[i] = humanPlayer;
+                        let score = minimax(board, depth + 1, true, aiPlayer, humanPlayer);
+                        board[i] = "";
+                        bestScore = Math.min(score, bestScore);
+                    }
+                }
+                return bestScore;
+            }
+        }
+
+        function checkWin(board, player) {
+            return winningConditions.some(condition => {
+                return condition.every(index => board[index] === player);
+            });
+        }
+
+        // --- Restart Logic ---
+
+        function restartGame() {
+            gameActive = true;
+            currentPlayer = "X"; // X always starts game logic, but who controls X changes
+            gameState = ["", "", "", "", "", "", "", "", ""];
+            
+            // Reset Grid UI
+            cells.forEach(cell => {
+                cell.innerText = "";
+                cell.removeAttribute('data-player');
+                cell.classList.remove('pop');
+            });
+
+            gridElement.classList.remove('disabled');
+
+            // Setup Players based on selection
+            if (gameModeSelect.value === 'pvc') {
+                // If Human chose "Player O (Second)", then Human is O, AI is X
+                if (startPlayerSelect.value === 'O') {
+                    humanSide = "O";
+                    statusDisplay.innerText = "AI (X) is thinking...";
+                    gridElement.classList.add('disabled');
+                    setTimeout(makeComputerMove, 800); // AI moves first
+                } else {
+                    humanSide = "X";
+                    statusDisplay.innerText = "Your Turn (X)";
+                }
+            } else {
+                // PvP Mode
+                statusDisplay.innerText = "Player X's Turn";
+            }
+        }
+
+        // Initial Start
+        cells.forEach(cell => cell.addEventListener('click', handleCellClick));
+        restartBtn.addEventListener('click', restartGame);
+        restartGame(); // Run once to set initial state
+
+    </script>
+</body>
+</html>

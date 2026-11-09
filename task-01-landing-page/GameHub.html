@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS | Ultimate Gaming Experience</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- 0. VARIABLES & RESET --- */
+        :root {
+            --bg-color: #050505;
+            --card-bg: #0f0f10;
+            --neon-blue: #00f3ff;
+            --neon-pink: #ff0055;
+            --neon-purple: #bc13fe;
+            --text-main: #ffffff;
+            --text-muted: #888888;
+            --font-head: 'Orbitron', sans-serif;
+            --font-body: 'Rajdhani', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+            cursor: none; /* Hide default cursor for custom one */
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-body);
+            overflow-x: hidden;
+        }
+
+        /* --- 1. SYSTEM PRELOADER --- */
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.8s ease, visibility 0.8s;
+        }
+
+        .loader-text {
+            font-family: var(--font-head);
+            color: var(--neon-blue);
+            margin-bottom: 20px;
+            letter-spacing: 4px;
+            font-size: 1.2rem;
+            animation: blink 0.8s infinite;
+        }
+
+        .loader-bar {
+            width: 300px;
+            height: 4px;
+            background: #222;
+            border-radius: 2px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+        }
+
+        .bar-fill {
+            width: 0%;
+            height: 100%;
+            background: var(--neon-blue);
+            animation: loadProgress 2.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+            box-shadow: 0 0 15px var(--neon-blue);
+        }
+
+        /* --- 2. CUSTOM CURSOR --- */
+        .cursor-dot {
+            width: 6px;
+            height: 6px;
+            background-color: var(--neon-blue);
+            position: fixed;
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            z-index: 9999;
+            pointer-events: none;
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .cursor-outline {
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            position: fixed;
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            z-index: 9998;
+            pointer-events: none;
+            transition: width 0.2s, height 0.2s, background-color 0.2s, border-color 0.2s;
+        }
+
+        /* Hover State for Cursor */
+        body.hovered .cursor-outline {
+            width: 60px;
+            height: 60px;
+            background-color: rgba(0, 243, 255, 0.1);
+            border-color: var(--neon-blue);
+            backdrop-filter: blur(2px);
+        }
+
+        /* --- 3. NAVBAR --- */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 25px 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            transition: all 0.4s ease;
+        }
+
+        nav.scrolled {
+            background: rgba(5, 5, 5, 0.8);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 15px 8%;
+        }
+
+        .logo {
+            font-family: var(--font-head);
+            font-size: 1.8rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            color: white;
+            z-index: 1001;
+            text-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .dot { color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .nav-links li a {
+            text-decoration: none;
+            color: var(--text-main);
+            font-weight: 600;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        .nav-links li a.active, .nav-links li a:hover { color: var(--neon-blue); }
+
+        .nav-links li a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: var(--neon-blue);
+            transition: width 0.3s;
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .nav-links li a.active::after { width: 100%; }
+
+        .btn-nav {
+            border: 1px solid var(--neon-blue);
+            padding: 10px 25px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            color: var(--neon-blue) !important;
+        }
+
+        .btn-nav:hover {
+            background: var(--neon-blue);
+            color: black !important;
+            box-shadow: 0 0 20px var(--neon-blue);
+        }
+
+        .hamburger { display: none; cursor: pointer; z-index: 1001; }
+        .hamburger div { width: 30px; height: 3px; background-color: white; margin: 6px; transition: all 0.3s ease; }
+
+        /* --- 4. HERO SECTION --- */
+        header {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            background: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #000000 100%);
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background-image: 
+                linear-gradient(rgba(0, 243, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 243, 255, 0.1) 1px, transparent 1px);
+            background-size: 60px 60px;
+            transform: perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px);
+            animation: gridMove 20s linear infinite;
+            opacity: 0.3;
+        }
+
+        .hero-content { z-index: 2; text-align: center; max-width: 900px; padding: 20px; }
+
+        .sub-title {
+            color: var(--neon-blue);
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            display: block;
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.4);
+        }
+
+        h1 {
+            font-family: var(--font-head);
+            font-size: 5.5rem;
+            line-height: 1;
+            color: white;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        .glitch { position: relative; }
+        .glitch::before, .glitch::after {
+            content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color);
+        }
+        .glitch::before {
+            left: 2px; text-shadow: -2px 0 var(--neon-pink); clip: rect(24px, 550px, 90px, 0);
+            animation: glitch-anim-2 3s infinite linear alternate-reverse;
+        }
+        .glitch::after {
+            left: -2px; text-shadow: -2px 0 var(--neon-blue); clip: rect(85px, 550px, 140px, 0);
+            animation: glitch-anim 2.5s infinite linear alternate-reverse;
+        }
+
+        .cta-group { margin-top: 50px; display: flex; gap: 20px; justify-content: center; }
+        
+        .btn-primary {
+            padding: 15px 40px;
+            background: var(--neon-blue);
+            color: #000;
+            font-weight: 800;
+            text-transform: uppercase;
+            text-decoration: none;
+            clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+            transition: all 0.3s;
+            position: relative;
+        }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 0 30px var(--neon-blue); background: white; }
+
+        .btn-secondary {
+            padding: 15px 40px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            font-weight: 800;
+            text-transform: uppercase;
+            text-decoration: none;
+            clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+            transition: all 0.3s;
+        }
+        .btn-secondary:hover { border-color: var(--neon-pink); color: var(--neon-pink); box-shadow: 0 0 20px var(--neon-pink); }
+
+        /* --- 5. CONSOLES SECTION (3D TILT) --- */
+        #consoles {
+            padding: 120px 8%;
+            background: linear-gradient(180deg, var(--bg-color) 0%, #0b0b0f 100%);
+            position: relative;
+        }
+
+        .section-title {
+            text-align: center;
+            font-family: var(--font-head);
+            font-size: 3rem;
+            margin-bottom: 80px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 50px;
+            perspective: 1000px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 20px;
+            position: relative;
+            transform-style: preserve-3d; /* Key for 3D effect */
+            transition: transform 0.1s ease-out;
+            border: 1px solid rgba(255,255,255,0.05);
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .card-glow {
+            position: absolute; top: -50px; right: -50px; width: 150px; height: 150px;
+            background: var(--neon-blue); filter: blur(90px); opacity: 0.1;
+            transition: opacity 0.4s ease; transform: translateZ(-20px);
+        }
+        .card:hover .card-glow { opacity: 0.4; }
+        .card-glow.pink { background: var(--neon-pink); }
+        .card-glow.purple { background: var(--neon-purple); }
+
+        .card-content { transform: translateZ(40px); }
+
+        .card h3 { font-family: var(--font-head); font-size: 2rem; margin-bottom: 15px; }
+        .card p { color: var(--text-muted); line-height: 1.7; font-size: 1.1rem; }
+
+        .card-link {
+            display: inline-block; margin-top: 30px; color: white; text-decoration: none;
+            font-weight: 700; border-bottom: 1px solid var(--neon-blue); padding-bottom: 5px;
+            transition: color 0.3s;
+        }
+        .card-link:hover { color: var(--neon-blue); }
+
+        /* --- 6. MODAL (POPUP) --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
+            z-index: 10002; display: none; justify-content: center; align-items: center;
+            opacity: 0; transition: opacity 0.3s ease;
+        }
+        
+        .modal-active { display: flex; opacity: 1; }
+
+        .modal-content {
+            background: #111; padding: 50px; border: 1px solid var(--neon-blue);
+            border-radius: 15px; max-width: 600px; width: 90%; position: relative;
+            box-shadow: 0 0 50px rgba(0, 243, 255, 0.15);
+            transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .modal-active .modal-content { transform: scale(1); }
+
+        .close-modal {
+            position: absolute; top: 20px; right: 25px; font-size: 30px; color: #555;
+            cursor: pointer; transition: 0.3s;
+        }
+        .close-modal:hover { color: var(--neon-pink); transform: rotate(90deg); }
+
+        /* --- 7. FOOTER --- */
+        #join {
+            padding: 100px 20px; text-align: center; border-top: 1px solid rgba(255,255,255,0.05);
+            background: radial-gradient(circle at center, #1a1a2e 0%, #000000 80%);
+        }
+        .newsletter-form input {
+            padding: 15px; width: 300px; background: #0f0f10; border: 1px solid #333; color: white; margin: 10px;
+        }
+        .newsletter-form button {
+            padding: 15px 35px; background: var(--neon-purple); border: none; color: white; font-weight: bold; cursor: pointer;
+        }
+
+        /* --- ANIMATIONS & MEDIA QUERIES --- */
+        .hidden { opacity: 0; filter: blur(5px); transform: translateY(30px); transition: all 1s ease; }
+        .show { opacity: 1; filter: blur(0); transform: translateY(0); }
+        
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        @keyframes loadProgress { 0% { width: 0%; } 40% { width: 30%; } 100% { width: 100%; } }
+        @keyframes gridMove { 0% { transform: perspective(500px) rotateX(60deg) translateY(0) translateZ(-200px); } 100% { transform: perspective(500px) rotateX(60deg) translateY(50px) translateZ(-200px); } }
+        @keyframes glitch-anim { 0% { clip: rect(10px, 9999px, 30px, 0); } 100% { clip: rect(60px, 9999px, 80px, 0); } }
+        @keyframes glitch-anim-2 { 0% { clip: rect(120px, 9999px, 140px, 0); } 100% { clip: rect(40px, 9999px, 60px, 0); } }
+
+        @media screen and (max-width: 768px) {
+            h1 { font-size: 3rem; }
+            .nav-links {
+                position: absolute; right: 0; height: 100vh; top: 0; background: #050505;
+                flex-direction: column; justify-content: center; width: 75%;
+                transform: translateX(100%); transition: transform 0.5s cubic-bezier(0.77, 0, 0.175, 1);
+                border-left: 1px solid #333;
+            }
+            .hamburger { display: block; }
+            .nav-active { transform: translateX(0%); }
+            .toggle .line1 { transform: rotate(-45deg) translate(-5px, 6px); }
+            .toggle .line2 { opacity: 0; }
+            .toggle .line3 { transform: rotate(45deg) translate(-5px, -6px); }
+            .cursor-dot, .cursor-outline { display: none; } /* No custom cursor on touch */
+            * { cursor: auto; }
+            .card { transform: none !important; } /* Disable tilt on mobile */
+        }
+    </style>
+</head>
+<body>
+
+    <div id="preloader">
+        <div class="loader-text">SYSTEM INITIALIZING...</div>
+        <div class="loader-bar"><div class="bar-fill"></div></div>
+    </div>
+
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+
+    <div id="modal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 id="modal-title" style="font-family: var(--font-head); color: var(--neon-blue); margin-bottom: 15px;">Specs</h2>
+            <p id="modal-desc" style="color: #bbb; line-height: 1.6;">
+                Processor: 8-Core Zen 2 Custom CPU<br>
+                GPU: 12 Teraflops RDNA 2<br>
+                Memory: 16GB GDDR6<br>
+                Storage: 1TB Custom NVMe SSD<br>
+                Output: 4K @ 120 FPS / 8K Support
+            </p>
+            <button class="btn-primary" style="margin-top:25px; width: 100%; border: none;">Pre-Order Now</button>
+        </div>
+    </div>
+
+    <nav id="navbar">
+        <div class="logo">NEXUS<span class="dot">.</span></div>
+        <ul class="nav-links">
+            <li><a href="#hero" class="active">Start</a></li>
+            <li><a href="#consoles">Systems</a></li>
+            <li><a href="#games">Library</a></li>
+            <li><a href="#join" class="btn-nav">Join Beta</a></li>
+        </ul>
+        <div class="hamburger">
+            <div class="line1"></div>
+            <div class="line2"></div>
+            <div class="line3"></div>
+        </div>
+    </nav>
+
+    <header id="hero">
+        <div class="hero-content">
+            <span class="sub-title hidden">Welcome to the future</span>
+            <h1 class="glitch hidden" data-text="UNLEASH REALITY">UNLEASH REALITY</h1>
+            <p class="hidden" style="color: #bbb; margin-bottom: 30px; font-size: 1.2rem;">Next-gen fidelity. Zero latency. Infinite immersion.</p>
+            <div class="cta-group hidden">
+                <a href="#consoles" class="btn-primary">Explore Systems</a>
+                <a href="#join" class="btn-secondary">Get Access</a>
+            </div>
+        </div>
+    </header>
+
+    <section id="consoles">
+        <div class="container">
+            <h2 class="section-title hidden">Battle Stations</h2>
+            <div class="card-grid">
+                <div class="card hidden">
+                    <div class="card-glow"></div>
+                    <div class="card-content">
+                        <h3>Series X</h3>
+                        <p>Raw power processing. 12 Teraflops of graphical dominance. The monolith of performance.</p>
+                        <a href="#" class="card-link">View Specs &rarr;</a>
+                    </div>
+                </div>
+                <div class="card hidden">
+                    <div class="card-glow pink"></div>
+                    <div class="card-content">
+                        <h3>PlayStation 5</h3>
+                        <p>Haptic feedback integration. Feel every crash and explosion with the DualSense controller.</p>
+                        <a href="#" class="card-link">View Specs &rarr;</a>
+                    </div>
+                </div>
+                <div class="card hidden">
+                    <div class="card-glow purple"></div>
+                    <div class="card-content">
+                        <h3>PC Master Race</h3>
+                        <p>Modular freedom. RTX On. Push framerates beyond the human eye's capability.</p>
+                        <a href="#" class="card-link">View Specs &rarr;</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="games" style="min-height: 80vh; padding: 100px 8%; display: flex; align-items: center; justify-content: center; background: #080808; border-top: 1px solid rgba(255,255,255,0.05);">
+        <div class="hidden" style="text-align: center;">
+            <h2 class="section-title">Library Incoming</h2>
+            <div style="width: 50px; height: 50px; border: 3px solid #333; border-top: 3px solid var(--neon-blue); border-radius: 50%; margin: 0 auto 20px; animation: spin 1s linear infinite;"></div>
+            <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
+            <p style="color: #888;">Connecting to server...</p>
+        </div>
+    </section>
+
+    <section id="join">
+        <div class="footer-content hidden">
+            <h2 style="font-family: var(--font-head); margin-bottom: 10px; color: white;">Stay Connected</h2>
+            <p style="color: #888; margin-bottom: 20px;">Get drops, skins, and console restock alerts.</p>
+            <form class="newsletter-form">
+                <input type="email" placeholder="Enter your email...">
+                <button type="button">Subscribe</button>
+            </form>
+        </div>
+    </section>
+
+    <script>
+        // 1. PRELOADER FADE OUT
+        window.addEventListener('load', () => {
+            const preloader = document.getElementById('preloader');
+            setTimeout(() => {
+                preloader.style.opacity = '0';
+                preloader.style.visibility = 'hidden';
+            }, 2200); // Matches CSS animation + delay
+        });
+
+        // 2. CUSTOM CURSOR
+        const cursorDot = document.querySelector('.cursor-dot');
+        const cursorOutline = document.querySelector('.cursor-outline');
+        const body = document.querySelector('body');
+
+        window.addEventListener('mousemove', (e) => {
+            const posX = e.clientX;
+            const posY = e.clientY;
+            cursorDot.style.left = `${posX}px`;
+            cursorDot.style.top = `${posY}px`;
+            cursorOutline.animate({
+                left: `${posX}px`, top: `${posY}px`
+            }, { duration: 500, fill: "forwards" });
+        });
+
+        // Hover Effect on Links/Buttons
+        document.querySelectorAll('a, button, .card').forEach(el => {
+            el.addEventListener('mouseenter', () => body.classList.add('hovered'));
+            el.addEventListener('mouseleave', () => body.classList.remove('hovered'));
+        });
+
+        // 3. NAVBAR SCROLL & SPY
+        const navbar = document.getElementById('navbar');
+        const sections = document.querySelectorAll('header, section');
+        const navLi = document.querySelectorAll('.nav-links li a');
+
+        window.addEventListener('scroll', () => {
+            // Glassmorphism toggle
+            if (window.scrollY > 50) navbar.classList.add('scrolled');
+            else navbar.classList.remove('scrolled');
+
+            // Scroll Spy
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= (sectionTop - section.clientHeight / 3)) {
+                    current = section.getAttribute('id');
+                }
+            });
+            navLi.forEach(li => {
+                li.classList.remove('active');
+                if (li.getAttribute('href').includes(current)) {
+                    li.classList.add('active');
+                }
+            });
+        });
+
+        // 4. MOBILE MENU
+        const burger = document.querySelector('.hamburger');
+        const nav = document.querySelector('.nav-links');
+        const navLinks = document.querySelectorAll('.nav-links li');
+
+        burger.addEventListener('click', () => {
+            nav.classList.toggle('nav-active');
+            navLinks.forEach((link, index) => {
+                if (link.style.animation) link.style.animation = '';
+                else link.style.animation = `navLinkFade 0.5s ease forwards ${index / 7 + 0.3}s`;
+            });
+            burger.classList.toggle('toggle');
+        });
+
+        // 5. 3D TILT EFFECT
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                if(window.innerWidth > 768) {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const xRot = -((y - rect.height / 2) / 15);
+                    const yRot = ((x - rect.width / 2) / 15);
+                    card.style.transform = `perspective(1000px) rotateX(${xRot}deg) rotateY(${yRot}deg) scale(1.02)`;
+                }
+            });
+            card.addEventListener('mouseleave', () => {
+                if(window.innerWidth > 768) card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
+            });
+        });
+         // 6. SCROLL REVEAL
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) entry.target.classList.add('show');
+            });
+        });
+        document.querySelectorAll('.hidden').forEach((el) => observer.observe(el));
+
+        // 7. MODAL LOGIC
+        const modal = document.getElementById('modal');
+        const modalTitle = document.getElementById('modal-title');
+        const closeModal = document.querySelector('.close-modal');
+        
+        document.querySelectorAll('.card-link').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const card = e.target.closest('.card');
+                const title = card.querySelector('h3').innerText;
+                modalTitle.innerText = title + " Specs";
+                modal.classList.add('modal-active');
+            });
+        });
+
+        closeModal.addEventListener('click', () => modal.classList.remove('modal-active'));
+        modal.addEventListener('click', (e) => {
+            if(e.target === modal) modal.classList.remove('modal-active');
+        });
+    </script>
+</body>
+</html>

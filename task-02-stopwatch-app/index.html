@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Stopwatch</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="timer-wrapper">
+            <div class="label">TOTAL TIME</div>
+            <div class="main-time" id="displayTotal">00:00.00</div>
+            <div class="split-time-wrapper">
+                <span class="label">CURRENT LAP</span>
+                <span id="displayLap">00:00.00</span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="btnLap" class="btn secondary" disabled>Lap (L)</button>
+            <button id="btnStart" class="btn primary">Start (Space)</button>
+            <button id="btnReset" class="btn danger" disabled>Reset (R)</button>
+        </div>
+
+        <div class="laps-wrapper">
+            <div class="laps-header">
+                <span>#</span>
+                <span>Split</span>
+                <span>Total</span>
+            </div>
+            <ul id="lapsList" class="laps-list"></ul>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
